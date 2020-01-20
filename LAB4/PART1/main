@@ -1,0 +1,84 @@
+/*
+ * LAB4_PART1.cpp
+ *
+ * Created: 1/19/2020 3:59:35 PM
+ * Author : Jose
+ */ 
+
+#include <avr/io.h>
+
+int main(void)
+{
+	/* Insert DDR and PORT initializations */
+	DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
+	DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
+	
+	enum STATES {START, WAIT, CHANGE, CHANGE2, ON} STATE;
+	
+    /* Replace with your application code */
+    while (1) 
+    {
+		switch(STATE){
+			case START:
+				STATE = WAIT;
+				break;
+			case WAIT:
+				if(!PINA){
+					STATE = WAIT;
+				} else if(PINA){
+					STATE = CHANGE;
+					PORTB = 0x10;
+				} else{
+					STATE = WAIT;
+				}
+				break;
+			case CHANGE:
+				if(PINA){
+					STATE = CHANGE;
+				} else if(!PINA) {
+					STATE = CHANGE2;
+				} else {
+					STATE = CHANGE;
+				}
+				break;
+			case CHANGE2:
+				if(!PINA) {
+					STATE = CHANGE2;
+				} else if (PINA) {
+					STATE = ON;
+				} else {
+					STATE = CHANGE2;
+				}
+				break;
+			case ON:
+				if(PINA) {
+					STATE = ON;
+				} else if (!PINA) {
+					STATE = WAIT;
+				} else {
+					STATE = ON;
+				}
+				break;
+			default:
+				STATE = START;
+				break;
+		}
+		switch(STATE) {
+			case START:
+				break;
+			case WAIT:
+				break;
+			case CHANGE:
+				break;
+			case CHANGE2:
+				PORTB = 0x02;
+				break;
+			case ON:
+				PORTB = 0x01;
+				break;
+			default:
+				break;
+		}
+	}
+}
+
