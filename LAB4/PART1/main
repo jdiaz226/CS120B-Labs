@@ -1,84 +1,73 @@
 /*
  * LAB4_PART1.cpp
  *
- * Created: 1/19/2020 3:59:35 PM
  * Author : Jose
  */ 
 
+/*	Author: Jose
+ *  Partner(s) Name & E-mail: Bo Yang byang059@ucr.edu
+ *	Lab Section: 24
+ *	Assignment: Lab #4  Exercise #1
+ *	Exercise Description: [optional - include for your own benefit]
+ *	
+ *	I acknowledge all content contained herein, excluding template or example
+ *	code, is my own original work.
+ */
+
 #include <avr/io.h>
 
+unsigned char clickButton=0;
+
+enum Button_States { B_start, Release_state, Press_state } button_state;
+
+void One_Button_System()
+{
+	switch( button_state)
+	{
+		case B_start:
+		//clickButton=0;  // doesn't affect the logic at all, so block it
+		PORTB=0x01;
+		button_state=Release_state;
+		break;
+		
+		case Release_state:
+		if( PINA==0x00 ){
+			// do nothing to stay in this state
+			}else if ( PINA==0x01 ) {
+			button_state=Press_state;
+			//clickButton=(clickButton==0) ? 1 : 0;   // doesn't affect the logic at all, so block it
+			PORTB=(PORTB==1) ? 2 : 1;
+			}else {
+			// do nothing to stay in this state
+			// In case if PORTA has unexpected value such as 0x70
+		}
+		break;
+		
+		case Press_state:
+		if( PINA==0x01 ){
+			// do nothing to stay in this state
+			}else if ( PINA==0x00 ) {
+			button_state=Release_state;
+			}else {
+			// do nothing to stay in this state
+			// In case if PORTA has unexpected value such as 0x70
+		}
+		break;
+		
+		default:			PORTB=0x03;  // turn on both LED lights to show unexpected situation
+		break;
+	}
+}
 int main(void)
 {
-	/* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
-	DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs, initialize to 0s
+	DDRA = 0X00; PORTA = 0xFF;
+	DDRB = 0xFF; PORTB = 0x00;
 	
-	enum STATES {START, WAIT, CHANGE, CHANGE2, ON} STATE;
+	button_state=B_start;
 	
-    /* Replace with your application code */
-    while (1) 
-    {
-		switch(STATE){
-			case START:
-				STATE = WAIT;
-				break;
-			case WAIT:
-				if(!PINA){
-					STATE = WAIT;
-				} else if(PINA){
-					STATE = CHANGE;
-					PORTB = 0x10;
-				} else{
-					STATE = WAIT;
-				}
-				break;
-			case CHANGE:
-				if(PINA){
-					STATE = CHANGE;
-				} else if(!PINA) {
-					STATE = CHANGE2;
-				} else {
-					STATE = CHANGE;
-				}
-				break;
-			case CHANGE2:
-				if(!PINA) {
-					STATE = CHANGE2;
-				} else if (PINA) {
-					STATE = ON;
-				} else {
-					STATE = CHANGE2;
-				}
-				break;
-			case ON:
-				if(PINA) {
-					STATE = ON;
-				} else if (!PINA) {
-					STATE = WAIT;
-				} else {
-					STATE = ON;
-				}
-				break;
-			default:
-				STATE = START;
-				break;
-		}
-		switch(STATE) {
-			case START:
-				break;
-			case WAIT:
-				break;
-			case CHANGE:
-				break;
-			case CHANGE2:
-				PORTB = 0x02;
-				break;
-			case ON:
-				PORTB = 0x01;
-				break;
-			default:
-				break;
-		}
+	while (1)
+	{
+		One_Button_System();
 	}
 }
 
